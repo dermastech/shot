@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Choice & Shot</title>
+  <script>
+    var img = new Array();
+  </script>
+</head>
+
+<body onload="title();">
+  <!--
+<div class="elm">
+-->
+  <canvas id="cv3" width="800" height="600" ></canvas>
+  <!--
+</div>
+-->
+<!--
+  <style>
+  .elm {
+    cursor: none;
+  }
+  </style>
+-->
+  <script>
+  var img = new Array();
+  img[1] = new Image();
+  img[1].src = "pic/player.png";
+  img[100] = new Image(); //画像オブジェクト作成
+  img[100].src = "pic/p_bullet.png"; //写真のパスを指定する
+  img[101] = new Image();
+  img[101].src = "pic/p_bullet_2.png";
+  img[200] = new Image();
+  img[200].src = "pic/e_bullet.png";
+  img[201] = new Image();
+  img[201].src = "pic/e_bullet_2.png";
+  img[301] = new Image();
+  img[301].src = "pic/enemy_1.png";
+  img[302] = new Image();
+  img[302].src = "pic/enemy_2.png";
+  document.onkeydown = keyboard_down;
+  document.onkeyup = keyboard_up;
+  document.onmousedown = click_down;
+  document.onmouseup = click_up;
+  var $id = function(id){ return document.getElementById(id); };
+    var keyboard=new Array(301);
+    let move = 0;
+    var player={x:100,y:100,dx:0,dy:0,speed:7,reload:0,hp:500,maxhp:500,attack:1,weapon:1,size:40};
+        enemy={x:100,y:100,angle:0,speed:3,reload:6000,charge:0,hp:200,maxhp:200,attack:1,type:0,weapon:1,size:50,t_charge:0,score:0};
+        mouse={x:0,y:0};
+        p_bullet={x:0,y:0,angle:0,size:0,state:1,time:100,speed:5,chase:0,blast:0,snipe:0,damage:100}
+        e_bullet={x:0,y:0,angle:0,size:0,state:1,time:100,speed:5,chase:0,blast:0,snipe:0,damage:100}
+        field={width:1600,height:1080,wall:20}
+        const DISP_X = 800,
+              DISP_Y = 540;
+        camera={x:0,y:0}
+        p_bullet_list = new Array();
+        e_bullet_list = new Array();
+        enemy_list = new Array();
+        gaming=-1;
+        primary=99;
+        secondary=98;
+        time_count=0;
+        score=0;
+
+
+
+    function title() {
+
+      var ctx = document.getElementById("cv3").getContext("2d");
+      ctx.fillStyle = "rgba(200,200,200,1)";
+      ctx.fillRect(0, 0, 800, 600)
+      opening()
+    }
+
+/////////////////////////////////////////main
+  function opening(){
+    var ctx = document.getElementById("cv3").getContext("2d");
+    ctx.fillStyle = "rgba(50,50,50,1)";
+    ctx.fillRect(0, 0, 800, 600)
+
+    ctx.font = "60px メイリオ";
+    ctx.fillStyle = "rgba(250,250,250,1)";
+    ctx.fillText("1つ目の武器を選んでね", 80, 80, 700);
+    for (var i = 1; i <= 5; i++) {
+      ctx.fillRect(-150+160*i, 200, 140, 200)
+    }
+    ctx.font = "30px メイリオ";
+    ctx.fillStyle = "rgba(0,0,0,1)";
+    ctx.fillText("PROTO", 20+160*0, 240, 700);
+    ctx.fillText("WIDE", 20+160*1, 240, 700);
+    ctx.fillText("CHASE", 20+160*2, 240, 700);
+    ctx.fillText("BLAST", 20+160*3, 240, 700);
+    ctx.fillText("SNIPE", 20+160*4, 240, 700);
+    ctx.fillText("通常", 80+160*0, 380, 700);
+    ctx.fillText("拡散", 80+160*1, 380, 700);
+    ctx.fillText("追尾", 80+160*2, 380, 700);
+    ctx.fillText("炸裂", 80+160*3, 380, 700);
+    ctx.fillText("狙撃", 80+160*4, 380, 700);
+    for (var i = 1; i <= 5; i++) {
+      if (mouse.x>-150+160*i&&mouse.x<-10+160*i&&mouse.y>200&&mouse.y<400&&keyboard[300]==1) {
+        primary=i
+        player.weapon=primary
+        break;
+      }
+    }
+    if (primary<=5&&gaming==-1) {
+      opening_2()
+    }else{
+      timer_op=setTimeout('opening()', 20)
+    }
+
+  }
+
+  function opening_2(){
+    if (gaming==-1) {
+      gaming=0
+      clearTimeout(timer_op);
+    }
+
+    var ctx = document.getElementById("cv3").getContext("2d");
+    ctx.fillStyle = "rgba(50,50,50,1)";
+    ctx.fillRect(0, 0, 800, 600)
+
+    ctx.font = "60px メイリオ";
+    ctx.fillStyle = "rgba(250,250,250,1)";
+    ctx.fillText("2つ目の武器を選んでね", 80, 80, 700);
+    for (var i = 1; i <= 5; i++) {
+      ctx.fillRect(-150+160*i, 200, 140, 200)
+    }
+    ctx.font = "30px メイリオ";
+    ctx.fillStyle = "rgba(0,0,0,1)";
+    ctx.fillText("PROTO", 20+160*0, 240, 700);
+    ctx.fillText("WIDE", 20+160*1, 240, 700);
+    ctx.fillText("CHASE", 20+160*2, 240, 700);
+    ctx.fillText("BLAST", 20+160*3, 240, 700);
+    ctx.fillText("SNIPE", 20+160*4, 240, 700);
+    ctx.fillText("通常", 80+160*0, 380, 700);
+    ctx.fillText("拡散", 80+160*1, 380, 700);
+    ctx.fillText("追尾", 80+160*2, 380, 700);
+    ctx.fillText("炸裂", 80+160*3, 380, 700);
+    ctx.fillText("狙撃", 80+160*4, 380, 700);
+    ctx.fillStyle = "rgba(250,100,100,1)";
+    ctx.fillText("選択済", -160+35+160*primary, 305, 700);
+    for (var i = 1; i <= 5; i++) {
+      if (mouse.x>-150+160*i&&mouse.x<-10+160*i&&mouse.y>200&&mouse.y<400&&keyboard[300]==1) {
+        if (i!=primary) {
+          secondary=i
+          break;
+        }
+      }
+    }
+    if (secondary<=5&&gaming==0) {
+      main()
+    }else{
+      timer_op_2=setTimeout('opening_2()', 20)
+    }
+  }
+
+
+
+    function main() {
+      if (gaming==0) {
+        clearTimeout(timer_op_2);
+        gaming=1
+      }
+
+      if (player.reload>0) {
+              player.reload-=300
+      }
+
+      player_moves()
+      camera_moves()
+      player_shot()
+      enemy_spawn()
+      enemy_check()
+      p_bullet_check()
+      e_bullet_check()
+      if (player.hp<=0) {
+        player.hp=player.maxhp
+        score/=2
+      }
+      enemy_dead()
+      draw()
+      time_count++
+      if (time_count>=3000){
+        end()
+      }else{
+        timer_main=setTimeout('main()', 20)
+      }
+    }
+
+
+//////////////////////////////////////////////mainend
+
+    function end(){
+      if (gaming==1) {
+        gaming=2
+        clearTimeout(timer_main);
+      }
+      var ctx = document.getElementById("cv3").getContext("2d");
+      ctx.fillStyle = "rgba(250,250,250,1)";
+      ctx.fillRect(0, 0, 800, 600)
+
+      ctx.font = "60px メイリオ";
+      ctx.fillStyle = "rgba(0,0,0,1)";
+      ctx.fillText("あなたのスコアは", 160, 80, 700);
+      ctx.fillText("tキーでツイート", 160, 480, 700);
+            ctx.font = "80px メイリオ";
+      ctx.fillText(Math.floor(score), 180, 300, 700);
+      if (keyboard[84]==1) {
+        tweet()
+      }else{
+        setTimeout('end()', 20)
+      }
+    }
+
+    function tweet() {
+      location.href = "https://twitter.com/intent/tweet?text=ChoiceAndShotで" + Math.floor(score) + "点獲得！ http://shot.dermas.trap.show/&hashtags=ChoiceAndShot"
+    }
+
+    function player_moves(){
+      player.dx=0;
+      player.dy=0
+      if (keyboard[65]==1) {
+        player.dx--;
+      }
+      if (keyboard[68]==1) {
+        player.dx++;
+      }
+      if (keyboard[87]==1) {
+        player.dy--;
+      }
+      if (keyboard[83]==1) {
+        player.dy++;
+      }
+      if (!(player.dx==0&&player.dy==0)) {
+        player.x+=player.dx*player.speed/Math.sqrt(player.dx**2+player.dy**2)
+        player.y+=player.dy*player.speed/Math.sqrt(player.dx**2+player.dy**2)
+      }
+      if (player.x-player.size/2<0+field.wall) {
+        player.x=0+field.wall+player.size/2
+      }else if (player.x+player.size/2>field.width-field.wall) {
+        player.x=field.width-field.wall-player.size/2
+      }
+      if (player.y-player.size/2<0+field.wall) {
+        player.y=0+field.wall+player.size/2
+      }else if (player.y+player.size/2>field.height-field.wall) {
+        player.y=field.height-field.wall-player.size/2
+      }
+    }
+
+    function camera_moves(){
+      if (DISP_X>field.width) {
+        camera.x=(DISP_X-field.width)
+      }else if (player.x-DISP_X/2<0) {
+        camera.x=0
+      }else if (player.x-DISP_X/2>field.width-DISP_X) {
+        camera.x=field.width-DISP_X
+      }else{
+        camera.x=player.x-DISP_X/2
+      }
+      if (DISP_Y>field.height) {
+        camera.y=(DISP_Y-field.height)
+      }else if (player.y-DISP_Y/2<0) {
+        camera.y=0
+      }else if (player.y-DISP_Y/2>field.height-DISP_Y) {
+        camera.y=field.height-DISP_Y
+      }else{
+        camera.y=player.y-DISP_Y/2
+      }
+    }
+
+    function player_shot(){
+      if (keyboard[300]==1) {
+        if (player.reload<=0) {
+          switch (player.weapon) {
+            case 1:
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x)+(Math.random()-0.5)*Math.PI/6, size:30, state:1,time:40,speed:16,chase:0,blast:0,snipe:0,damage:110})
+            var cool=1800
+            break;
+            case 2:
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x)-Math.PI/6, size:20, state:1,time:24,speed:12,chase:0,blast:0,snipe:0,damage:30})
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x)-Math.PI/12, size:20, state:1,time:24,speed:12,chase:0,blast:0,snipe:0,damage:30})
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x),            size:30, state:1,time:24,speed:12,chase:0,blast:0,snipe:0,damage:40})
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x)+Math.PI/12, size:20, state:1,time:24,speed:12,chase:0,blast:0,snipe:0,damage:30})
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x)+Math.PI/6, size:20, state:1,time:24,speed:12,chase:0,blast:0,snipe:0,damage:30})
+            var cool=2400
+            break;
+            case 3:
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x), size:40, state:1,time:60,speed:16,chase:1,blast:0,snipe:0,damage:120})
+            var cool=7500
+            break;
+            case 4:
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x), size:60, state:1,time:36,speed:16,chase:0,blast:1,snipe:0,damage:128})
+            var cool=9000
+            break;
+            case 5:
+            add_p_bullet({x:player.x, y:player.y, angle:-Math.atan2(mouse.y+camera.y-player.y,mouse.x+camera.x-player.x), size:24, state:1,time:1000,speed:24,chase:0,blast:0,snipe:1,damage:1000})
+            var cool=12000
+            break;
+            default:
+              break;
+          }
+
+        player.reload+=cool
+        }
+      }
+    }
+
+    function draw(){
+      var ctx = document.getElementById("cv3").getContext("2d");
+      ctx.fillStyle = "rgba(230,230,230,1)";
+      ctx.fillRect(0, 0, 800, 600)
+      ctx.fillStyle = "rgba(50,50,50,1)";
+      {
+        ctx.fillRect(0-camera.x, 0-camera.y, field.width, field.wall)
+        ctx.fillRect(0-camera.x, 0-camera.y, field.wall,field.height)
+        ctx.fillRect(field.width-camera.x, field.height-camera.y, -field.width, -field.wall)
+        ctx.fillRect(field.width-camera.x, field.height-camera.y, -field.wall,-field.height)
+      }
+      ctx.font = "740px メイリオ";
+      ctx.fillStyle = "rgba(180,180,180,0.3)";
+      for (var i = 0; i < 2; i++) {
+        for (var j = 0; j < 2; j++) {
+          ctx.fillRect(field.wall-camera.x+(field.width-field.wall*2)*i/2,field.wall-camera.y+(field.height-field.wall*2)*j/2, (field.width-field.wall*2)/4, (field.height-field.wall*2)/4)
+          ctx.fillRect(field.wall-camera.x+(field.width-field.wall*2)*(i+1/2)/2,field.wall-camera.y+(field.height-field.wall*2)*(j+1/2)/2, (field.width-field.wall*2)/4, (field.height-field.wall*2)/4)
+        }
+      }
+      ctx.drawImage(img[1],player.x-player.size/2-camera.x, player.y-player.size/2-camera.y, player.size,player.size)//プレイヤー
+      ctx.fillStyle = "rgba(0,0,0,1)";
+
+
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 20, 0, Math.PI*2, true);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mouse.x-30,mouse.y);
+      ctx.lineTo(mouse.x+30,mouse.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mouse.x,mouse.y-30);
+      ctx.lineTo(mouse.x,mouse.y+30);
+      ctx.stroke();
+      ctx.globalAlpha = 0.8;
+
+      for (var i = p_bullet_list.length-1; i >=0; i--) {
+        if (p_bullet_list[i].blast==0) {
+          ctx.drawImage(img[100], p_bullet_list[i].x-p_bullet_list[i].size/2-camera.x, p_bullet_list[i].y-p_bullet_list[i].size/2-camera.y, p_bullet_list[i].size, p_bullet_list[i].size);
+        }else if(p_bullet_list[i].blast==1){
+          if(p_bullet_list[i].time/3==1||p_bullet_list[i].time/3==3||p_bullet_list[i].time/3==5){
+            ctx.drawImage(img[101], p_bullet_list[i].x-p_bullet_list[i].size/2-camera.x, p_bullet_list[i].y-p_bullet_list[i].size/2-camera.y, p_bullet_list[i].size, p_bullet_list[i].size);
+          }else{
+            ctx.drawImage(img[100], p_bullet_list[i].x-p_bullet_list[i].size/2-camera.x, p_bullet_list[i].y-p_bullet_list[i].size/2-camera.y, p_bullet_list[i].size, p_bullet_list[i].size);
+          }
+        }
+      }
+      for (var i = e_bullet_list.length-1; i >=0; i--) {
+        if (e_bullet_list[i].blast==0) {
+          ctx.drawImage(img[200], e_bullet_list[i].x-e_bullet_list[i].size/2-camera.x, e_bullet_list[i].y-e_bullet_list[i].size/2-camera.y, e_bullet_list[i].size, e_bullet_list[i].size);
+        }else if(e_bullet_list[i].blast==1){
+          if(e_bullet_list[i].time/3==1||e_bullet_list[i].time/3==3||e_bullet_list[i].time/3==5){
+            ctx.drawImage(img[201], e_bullet_list[i].x-e_bullet_list[i].size/2-camera.x, e_bullet_list[i].y-e_bullet_list[i].size/2-camera.y, e_bullet_list[i].size, e_bullet_list[i].size);
+          }else{
+            ctx.drawImage(img[200], e_bullet_list[i].x-e_bullet_list[i].size/2-camera.x, e_bullet_list[i].y-e_bullet_list[i].size/2-camera.y, e_bullet_list[i].size, e_bullet_list[i].size);
+          }
+        }
+        }
+      ctx.globalAlpha = 1;
+        for (var i = enemy_list.length-1; i >=0; i--) {
+          if (enemy_list[i].type==0) {
+            ctx.drawImage(img[301], enemy_list[i].x-enemy_list[i].size/2-camera.x,enemy_list[i].y-enemy_list[i].size/2-camera.y, enemy_list[i].size, enemy_list[i].size);
+          }else if (enemy_list[i].type==1) {
+            ctx.drawImage(img[302], enemy_list[i].x-enemy_list[i].size/2-camera.x,enemy_list[i].y-enemy_list[i].size/2-camera.y, enemy_list[i].size, enemy_list[i].size);
+          }
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
+            ctx.fillRect(enemy_list[i].x-enemy_list[i].size/2-camera.x, enemy_list[i].y-enemy_list[i].size/2-camera.y+enemy_list[i].size*2/3, enemy_list[i].size, enemy_list[i].size/6)
+            ctx.fillStyle = "rgba(200,200,0,0.5)";
+            ctx.fillRect(enemy_list[i].x-enemy_list[i].size/2-camera.x, enemy_list[i].y-enemy_list[i].size/2-camera.y+enemy_list[i].size*2/3, enemy_list[i].size*enemy_list[i].hp/enemy_list[i].maxhp, enemy_list[i].size/6)
+        }
+
+
+
+      ctx.fillStyle = "rgba(220,220,160,1)";
+      ctx.fillRect(0, 541, 800, 60)
+
+      ctx.fillStyle = "rgba(0,0,0,1)";
+      ctx.fillRect(50, 551, 200, 40)
+
+      ctx.fillStyle = "rgba(200,50,50,1)";
+      ctx.fillRect(53, 554, 194, 34)
+
+      ctx.fillStyle = "rgba(50,200,50,1)";
+      ctx.fillRect(53, 554, 194*player.hp/player.maxhp, 34)
+
+      ctx.font = "50px メイリオ";
+      ctx.fillStyle = "rgba(0,0,0,1)";
+      //ctx.fillText(player.hp, 440, 570, 500);
+      //ctx.fillText(player.maxhp, 540, 570, 500);
+      ctx.fillText(60-Math.floor(time_count/50), 380, 585, 500);
+      ctx.fillText(( '00000000' + Math.floor(score) ).slice( -8 ), 550, 585, 400);
+      //ctx.fillText(enemy_list.length, 540, 570, 500);
+    }
+
+    function add_p_bullet(p_b) {
+      p_bullet_list.push(p_b)
+    }
+
+    function p_bullet_check(){
+      if (p_bullet_list.length>10000) {
+        p_bullet_list=[];
+      }
+
+      for (var i = p_bullet_list.length-1; i >=0; i--) {
+        p_bullet_list[i].time--
+        if (p_bullet_list[i].blast==1) {
+          p_bullet_list[i].speed=p_bullet_list[i].speed*0.96
+        }
+        if (p_bullet_list[i].snipe==1) {
+          p_bullet_list[i].damage*=1.02
+        }
+        if (p_bullet_list[i].chase==1) {
+          if (enemy_list.length>0){
+            var nearest
+            var dist=9999999
+
+            for (var j = enemy_list.length-1; j >=0; j--) {
+              if (distance(p_bullet_list[i].x,p_bullet_list[i].y,enemy_list[j].x,enemy_list[j].y)<dist) {
+                dist=distance(p_bullet_list[i].x,p_bullet_list[i].y,enemy_list[j].x,enemy_list[j].y)
+                nearest=j
+              }
+            }
+            let enemy_angle=-Math.atan2(enemy_list[nearest].y-p_bullet_list[i].y,enemy_list[nearest].x-p_bullet_list[i].x)
+            let angle_mod=p_bullet_list[i].angle % (Math.PI*2)
+            if (angle_mod>Math.PI) {
+              angle_mod-=(Math.PI*2)
+            }
+            let chase_coef
+            if (dist<100){
+              chase_coef=4
+            }else{
+              chase_coef=10
+            }
+
+            if (Math.abs(enemy_angle-angle_mod)<=Math.PI){
+              p_bullet_list[i].angle=p_bullet_list[i].angle+(enemy_angle-angle_mod)*1/chase_coef
+            }else if(enemy_angle-angle_mod>Math.PI){
+              p_bullet_list[i].angle=p_bullet_list[i].angle+(enemy_angle-angle_mod-Math.PI*2)*1/chase_coef
+            }else{
+              p_bullet_list[i].angle=p_bullet_list[i].angle+(enemy_angle-angle_mod+Math.PI*2)*1/chase_coef
+            }
+
+          }else{
+            p_bullet_list[i].angle+=0
+          }
+        }else{
+          p_bullet_list[i].angle+=0
+        }
+        if (p_bullet_list[i].snipe==1) {
+          var tmp_x=p_bullet_list[i].x+(p_bullet_list[i].speed*Math.cos(p_bullet_list[i].angle))/2
+          var tmp_y=p_bullet_list[i].y+(p_bullet_list[i].speed*Math.sin(p_bullet_list[i].angle)*-1)/2
+        }
+          p_bullet_list[i].x+=p_bullet_list[i].speed*Math.cos(p_bullet_list[i].angle)
+          p_bullet_list[i].y+=p_bullet_list[i].speed*Math.sin(p_bullet_list[i].angle)*-1
+
+
+          for (var j = enemy_list.length-1; j >=0; j--) {
+            if (p_bullet_list[i].snipe==1) {
+              if (distance(tmp_x,tmp_y,enemy_list[j].x,enemy_list[j].y)<(p_bullet_list[i].size+enemy_list[j].size)/2) {
+                enemy_list[j].hp-=p_bullet_list[i].damage*player.attack
+                p_bullet_list[i].state=0
+                break
+              }
+            }
+            if (distance(p_bullet_list[i].x,p_bullet_list[i].y,enemy_list[j].x,enemy_list[j].y)<(p_bullet_list[i].size+enemy_list[j].size)/2) {
+              enemy_list[j].hp-=p_bullet_list[i].damage*player.attack
+              p_bullet_list[i].state=0
+              break
+            }
+          }
+
+
+          if (p_bullet_list[i].x<field.wall||p_bullet_list[i].x>field.width-field.wall||p_bullet_list[i].y<0+field.wall||p_bullet_list[i].y>field.height-field.wall) {
+            p_bullet_list[i].state=0
+          }else if(p_bullet_list[i].time==0){
+              p_bullet_list[i].state=0
+          }
+          if(p_bullet_list[i].state==0){
+            if (p_bullet_list[i].blast==1) {
+              for (var j = 0; j < 16; j++) {
+                add_p_bullet({x:p_bullet_list[i].x, y:p_bullet_list[i].y, angle:Math.PI*j/8, size:20, state:1,time:10,speed:12,blast:0,chase:0,snipe:0,damage:64})
+              }
+            }
+            p_bullet_list.splice(i,1);
+          }
+      }
+    }
+
+    function add_e_bullet(e_b) {
+      e_bullet_list.push(e_b)
+    }
+
+    function e_bullet_check(){
+      if (e_bullet_list.length>10000) {
+        e_bullet_list=[];
+      }
+
+      for (var i = e_bullet_list.length-1; i >=0; i--) {
+        e_bullet_list[i].time--
+        if (e_bullet_list[i].chase==1) {
+
+            let player_angle=-Math.atan2(player.y-e_bullet_list[i].y,player.x-e_bullet_list[i].x)
+            let angle_mod=e_bullet_list[i].angle % (Math.PI*2)
+            if (angle_mod>Math.PI) {
+              angle_mod-=(Math.PI*2)
+            }
+            if (Math.abs(player_angle-angle_mod)<=Math.PI){
+              e_bullet_list[i].angle=e_bullet_list[i].angle+(player_angle-angle_mod)*1/20
+            }else if(player_angle-angle_mod>Math.PI){
+              e_bullet_list[i].angle=e_bullet_list[i].angle+(player_angle-angle_mod-Math.PI*2)*1/20
+            }else{
+              e_bullet_list[i].angle=e_bullet_list[i].angle+(player_angle-angle_mod+Math.PI*2)*1/20
+            }
+
+        }else{
+          e_bullet_list[i].angle+=0
+        }
+
+        if (e_bullet_list[i].blast==1) {
+          e_bullet_list[i].speed=e_bullet_list[i].speed*0.95
+        }
+          e_bullet_list[i].x+=e_bullet_list[i].speed*Math.cos(e_bullet_list[i].angle)
+          e_bullet_list[i].y+=e_bullet_list[i].speed*Math.sin(e_bullet_list[i].angle)*-1
+
+
+            if (distance(e_bullet_list[i].x,e_bullet_list[i].y,player.x,player.y)<(e_bullet_list[i].size+player.size)/2) {
+              player.hp-=e_bullet_list[i].damage
+              e_bullet_list[i].state=0
+            }
+
+
+          if (e_bullet_list[i].x<field.wall||e_bullet_list[i].x>field.width-field.wall||e_bullet_list[i].y<0+field.wall||e_bullet_list[i].y>field.height-field.wall) {
+            e_bullet_list[i].state=0
+          }else if(e_bullet_list[i].time<=0){
+              e_bullet_list[i].state=0
+          }
+          if(e_bullet_list[i].state==0){
+            if (e_bullet_list[i].blast==1) {
+              for (var j = 0; j < 16; j++) {
+                add_e_bullet({x:e_bullet_list[i].x, y:e_bullet_list[i].y, angle:Math.PI*j/8, size:20, state:1,time:10,speed:10,blast:0,chase:0,snipe:0,damage:e_bullet_list[i].damage/4})
+              }
+            }
+            e_bullet_list.splice(i,1);
+          }
+      }
+    }
+
+    function enemy_spawn() {
+      if (Math.random()>(0.98-time_count/40000+Math.sqrt(enemy_list.length)/100)) {
+        if (Math.random()>0.2) {
+          var tmp_size=50
+          var tmp_attack=4*time_count/600
+          var tmp_speed=3*(1+time_count/6000)
+          var tmp_weapon=1
+          var tmp_reload=9000-time_count*2
+          var tmp_hp=100*(1+time_count/1000)
+          var tmp_score=100*(1+time_count/600)
+        }else{
+          var tmp_size=100
+          var tmp_attack=10*time_count/600
+          var tmp_speed=1*(1+time_count/3000)
+          var tmp_weapon=4
+          var tmp_reload=24000-time_count*5
+          var tmp_hp=300*(1+time_count/1000)
+          var tmp_score=400*(1+time_count/600)
+        }
+        if (Math.random()>0.3) {
+          var tmp_type=1
+        }else{
+          var tmp_type=0
+          var tmp_weapon=0
+          tmp_speed*=1.5
+          tmp_attack*=1.5
+        }
+        var tmp_rep=10
+        while (tmp_rep--) {
+          var tmp_x=Math.random()*(field.width-field.wall*2-tmp_size)+field.wall+tmp_size/2
+          var tmp_y=Math.random()*(field.height-field.wall*2-tmp_size)+field.wall+tmp_size/2
+          if (!(tmp_x+tmp_size/2>camera.x&&tmp_x-tmp_size/2<camera.x+DISP_X&&tmp_y+tmp_size/2>camera.y&&tmp_y-tmp_size/2<camera.y+DISP_Y)||(field.width-field.wall*2-tmp_size<=DISP_X&&field.height-field.wall*2-tmp_size<DISP_Y)) {
+            add_enemy({x:tmp_x,y:tmp_y,angle:Math.random()*Math.PI*2,speed:tmp_speed,reload:tmp_reload,charge:0,hp:tmp_hp,maxhp:tmp_hp,attack:tmp_attack,type:tmp_type,weapon:tmp_weapon,size:tmp_size,t_charge:0,score:tmp_score})
+            break
+          }
+        }
+
+      }
+    }
+
+    function add_enemy(e) {
+      enemy_list.push(e)
+    }
+
+    function enemy_check(){
+      if (enemy_list.length>10000) {
+        enemy_list=[];
+      }
+      for (var i = enemy_list.length-1; i >=0; i--) {
+        enemy_list[i].time--
+        if (enemy_list[i].type==0) {
+          let player_angle=-Math.atan2(player.y-enemy_list[i].y,player.x-enemy_list[i].x)
+          let angle_mod=enemy_list[i].angle % (Math.PI*2)
+          if (angle_mod>Math.PI) {
+            angle_mod-=(Math.PI*2)
+          }
+          let chase_coef
+          if (distance(player.x,player.y,enemy_list[i].x,enemy_list[i].y)<100){
+            chase_coef=4
+          }else{
+            chase_coef=10
+          }
+
+          if (Math.abs(player_angle-angle_mod)<=Math.PI){
+            enemy_list[i].angle=enemy_list[i].angle+(player_angle-angle_mod)*1/chase_coef
+          }else if(player_angle-angle_mod>Math.PI){
+            enemy_list[i].angle=enemy_list[i].angle+(player_angle-angle_mod-Math.PI*2)*1/chase_coef
+          }else{
+            enemy_list[i].angle=enemy_list[i].angle+(player_angle-angle_mod+Math.PI*2)*1/chase_coef
+          }
+        }else if (enemy_list[i].type==1) {
+          if (Math.random()>0.99) {
+            enemy_list[i].angle+=((Math.random()-0.5)*Math.PI)
+          }
+        }
+
+
+        enemy_list[i].t_charge=Math.max(enemy_list[i].t_charge-1,0)
+          enemy_list[i].x+=enemy_list[i].speed*Math.cos(enemy_list[i].angle)
+          enemy_list[i].y+=enemy_list[i].speed*Math.sin(enemy_list[i].angle)*-1
+          if (enemy_list[i].x-enemy_list[i].size/2<0+field.wall) {
+            enemy_list[i].x=0+field.wall+enemy_list[i].size/2
+            enemy_list[i].angle=(Math.random()-0.5)*Math.PI*2
+          }else if (enemy_list[i].x+enemy_list[i].size/2>field.width-field.wall) {
+            enemy_list[i].x=field.width-field.wall-enemy_list[i].size/2
+            enemy_list[i].angle=(Math.random()-0.5)*Math.PI*2
+          }
+          if (enemy_list[i].y-enemy_list[i].size/2<0+field.wall) {
+            enemy_list[i].y=0+field.wall+enemy_list[i].size/2
+            enemy_list[i].angle=(Math.random()-0.5)*Math.PI*2
+          }else if (enemy_list[i].y+enemy_list[i].size/2>field.height-field.wall) {
+            enemy_list[i].y=field.height-field.wall-enemy_list[i].size/2
+            enemy_list[i].angle=(Math.random()-0.5)*Math.PI*2
+          }
+          if (distance(enemy_list[i].x,enemy_list[i].y,player.x,player.y)<(enemy_list[i].size+player.size)/2&&enemy_list[i].t_charge==0) {
+            player.hp-=enemy_list[i].attack
+            enemy_list[i].t_charge=100
+          }
+          if (enemy_list[i].weapon>=1) {
+            enemy_list[i].charge+=100
+            if (enemy_list[i].charge>=enemy_list[i].reload) {
+              enemy_list[i].charge-=enemy_list[i].reload
+              if (enemy_list[i].weapon==1) {
+                add_e_bullet({x:enemy_list[i].x, y:enemy_list[i].y, angle:-Math.atan2(player.y-enemy_list[i].y,player.x-enemy_list[i].x)+(Math.random()-0.5)*0.1, size:20, state:1,time:400,speed:6,blast:0,chase:0,snipe:0,damage:enemy_list[i].attack})
+              }else if (enemy_list[i].weapon==4) {
+                add_e_bullet({x:enemy_list[i].x, y:enemy_list[i].y, angle:-Math.atan2(player.y-enemy_list[i].y,player.x-enemy_list[i].x)+(Math.random()-0.5)*0.1, size:50, state:1,time:30,speed:16,blast:1,chase:0,snipe:0,damage:enemy_list[i].attack})
+              }
+
+            }
+
+          }
+      }
+    }
+
+    function enemy_dead(){
+      for (var i = enemy_list.length-1; i >=0; i--) {
+        if(enemy_list[i].hp<=0){
+            score+=enemy_list[i].score
+            enemy_list.splice(i,1);
+        }
+      }
+    }
+
+    function distance(p1x,p1y,p2x,p2y){
+      return Math.sqrt((p1x-p2x)**2+(p1y-p2y)**2)
+    }
+
+    function delay(s) { // s秒後に解決するプロミスを返す関数
+      return new Promise(ok => setTimeout(ok, s))
+    }
+
+    function keyboard_down(event){
+      keyboard[event.keyCode]=1;
+      if (event.keyCode==16&&gaming==1) {
+        if (player.weapon==primary) {
+          player.weapon=secondary
+        }else{
+          player.weapon=primary
+        }
+      }
+    }
+    function keyboard_up(event){
+      keyboard[event.keyCode]=0;
+    }
+    function click_down(event){
+      keyboard[300]=1;
+    }
+    function click_up(event){
+      keyboard[300]=0;
+    }
+
+    (function() {
+      function MouseMove00Func(e) {
+        var rect	= e.target.getBoundingClientRect();
+        mouse.x = e.clientX- Math.floor(rect.left);
+        mouse.y = e.clientY- Math.floor(rect.top);
+      }
+      canvas = $id("cv3");
+ g = canvas.getContext("2d");
+      if (document.addEventListener) {
+        canvas.addEventListener("mousemove", MouseMove00Func);
+      } else if (document.attachEvent) {
+        canvas.attachEvent("onmousemove", MouseMove00Func);
+      }
+
+    })();
+  </script>
+  <div id="piyo">
+  </div>
+
+  <br>
+  <br>操作説明
+  <br>最初にマウスで好きな武器を2つ選んでね！
+  <br>WASDで移動、マウスカーソルで照準を合わせて撃つ、シフトキーで武器切り替え
+  <br>60秒以内に敵を倒しまくってスコアを稼ごう！
+  <br>HPが0になっても終わらないが、大きくスコアが減るので注意！
+  <br>
+  <br>武器紹介
+  <br>PROTO:普通の武器。標準的な性能。
+  <br>WADE:5方向に打ち出す。
+  <br>CHASE:敵を自動で追いかける。攻撃力は低め。
+  <br>BLAST:撃ってから少しすると爆発する。直撃させよう。
+  <br>SNIPE:リロードは遅いけどとっても強力。相手との距離が空くほど威力が上がっていく。
+</body>
+
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>shot</title>
+  <script>
+    var img = new Array();
+  </script>
+</head>
+
+<body onload="title();">
+  <!--
+<div class="elm">
+-->
+  <canvas id="cv3" width="800" height="600" ></canvas>
+  <!--
+</div>
+-->
+<!--
+  <style>
+  .elm {
+    cursor: none;
+  }
+  </style>
+-->
+  <script>
+  var img = new Array();
+  img[0] = new Image(); //画像オブジェクト作成
+  img[0].src = "pic/e_bullet.png"; //写真のパスを指定する
+  document.onkeydown = keyboard_down;
+  document.onkeyup = keyboard_up;
+  document.onmousedown = click_down;
+  document.onmouseup = click_up;
+  var $id = function(id){ return document.getElementById(id); };
+    var keyboard=new Array(301);
+    let move = 0;
+    var player={x:0,y:0,dx:0,dy:0,speed:2};
+        mouse={x:0,y:0};
+        p_bullet={x:0,y:0,dx:0,dy:0,size:0,state:0,time:100,spped:5}
+
+    const FIELD_WIDTH = 80,
+      FIELD_HEIGHT = 54;
+    let amount = new Array()
+    let variable = new Array()
+    let concentration = new Array()
+    let p_bullet_list = new Array();
+
+
+
+    function title() {
+
+      var ctx = document.getElementById("cv3").getContext("2d");
+      ctx.fillStyle = "rgba(200,200,200,1)";
+      ctx.fillRect(0, 0, 800, 600)
+      main()
+    }
+
+
+    function main() {
+      player.dx=0;
+      player.dy=0
+      if (keyboard[65]==1) {
+        player.dx--;
+      }
+      if (keyboard[68]==1) {
+        player.dx++;
+      }
+      if (keyboard[87]==1) {
+        player.dy--;
+      }
+      if (keyboard[83]==1) {
+        player.dy++;
+      }
+      if (!(player.dx==0&&player.dy==0)) {
+        player.x+=player.dx*player.speed/Math.sqrt(player.dx**2+player.dy**2)
+        player.y+=player.dy*player.speed/Math.sqrt(player.dx**2+player.dy**2)
+      }
+
+      if (keyboard[300]==1) {
+        let r=Math.sqrt((mouse.x-player.x)**2+(mouse.y-player.y)**2);
+        if ((mouse.y-player.y)>=0) {
+          var angle_tmp=Math.acos((mouse.x-player.x)/r)*-1
+        }else{
+          var angle_tmp=Math.acos((mouse.x-player.x)/r)
+        }
+        add_p_bullet({x:player.x, y:player.y, angle:angle_tmp, size:5, state:1,time:1,speed:10,type:0})
+      }
+      p_bullet_check()
+      var ctx = document.getElementById("cv3").getContext("2d");
+      ctx.fillStyle = "rgba(200,200,200,1)";
+      ctx.fillRect(0, 0, 800, 600)
+      ctx.fillStyle = "rgba(220,220,160,1)";
+      ctx.fillRect(0, 541, 800, 60)
+      ctx.fillStyle = "rgba(20,20,200,1)";
+      ctx.fillRect(player.x-25, player.y-25, 50, 50)
+      ctx.fillStyle = "rgba(0,0,0,1)";
+      ctx.font = "30px メイリオ";
+      ctx.strokeStyle = "rgba(0,0,0,1)";
+      ctx.fillText(p_bullet_list.length, 40, 40, 500);
+      if (p_bullet_list.length>0) {
+        ctx.fillText(player.x, 80, 80, 500);
+        ctx.fillText(player.y, 120, 120, 500);
+      }
+
+      ctx.beginPath();
+      ctx.arc(mouse.x, mouse.y, 20, 0, Math.PI*2, true);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mouse.x-30,mouse.y);
+      ctx.lineTo(mouse.x+30,mouse.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mouse.x,mouse.y-30);
+      ctx.lineTo(mouse.x,mouse.y+30);
+      ctx.stroke();
+      ctx.globalAlpha = 0.5;
+
+      for (var i = p_bullet_list.length-1; i >=0; i--) {
+          ctx.drawImage(img[0], p_bullet_list[i].x-15, p_bullet_list[i].y-15, 30, 30);
+      }
+
+      ctx.globalAlpha = 1;
+      //alert("nya")
+      setTimeout('main()', 20)
+    }
+
+    function add_p_bullet(p_b) {
+      p_bullet_list.push(p_b)
+    }
+
+    function p_bullet_check(){
+      for (var i = p_bullet_list.length-1; i >=0; i--) {
+        p_bullet_list[i].angle+=0.02
+          p_bullet_list[i].x+=p_bullet_list[i].speed*Math.cos(p_bullet_list[i].angle)
+          p_bullet_list[i].y+=p_bullet_list[i].speed*Math.sin(p_bullet_list[i].angle)*-1
+          if (p_bullet_list[i].x<-100||p_bullet_list[i].x>900||p_bullet_list[i].y<-100||p_bullet_list[i].y>700) {
+            p_bullet_list.splice(i,1);
+          }
+      }
+    }
+
+
+    function delay(s) { // s秒後に解決するプロミスを返す関数
+      return new Promise(ok => setTimeout(ok, s))
+    }
+
+    function keyboard_down(event){
+      keyboard[event.keyCode]=1;
+    }
+    function keyboard_up(event){
+      keyboard[event.keyCode]=0;
+    }
+    function click_down(event){
+      keyboard[300]=1;
+    }
+    function click_up(event){
+      keyboard[300]=0;
+    }
+
+    (function() {
+      function MouseMove00Func(e) {
+        var rect	= e.target.getBoundingClientRect();
+        mouse.x = e.clientX- Math.floor(rect.left);
+        mouse.y = e.clientY- Math.floor(rect.top);
+      }
+      canvas = $id("cv3");
+ g = canvas.getContext("2d");
+      if (document.addEventListener) {
+        canvas.addEventListener("mousemove", MouseMove00Func);
+      } else if (document.attachEvent) {
+        canvas.attachEvent("onmousemove", MouseMove00Func);
+      }
+
+    })();
+  </script>
+  <div id="piyo">
+  </div>
+
+  <br>
+  <br>
+  <br>
+</body>
+
+</html>

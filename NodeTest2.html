@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>creeper_run</title>
+  <script>
+    var img = new Array();
+  </script>
+</head>
+
+<body>
+  <script>
+    function Queue() {
+      this.data = [];
+    }
+
+    Queue.prototype.push = function(val) {
+      this.data.push(val);
+      return val;
+    }
+    Queue.prototype.pop = function() {
+      return this.data.shift();
+    }
+    Queue.prototype.front = function() {
+      return this.data[0];
+    }
+    Queue.prototype.size = function() {
+      return this.data.length;
+    }
+    Queue.prototype.empty = function() {
+      return this.data.length == 0;
+    }
+
+    // 例
+    var q = new Queue();
+    q.push(1); // [] => [1]
+    q.push(2); // [1] => [1, 2]
+    alert(q.front()); // 1)
+    q.push(3); // [1, 2] => [1, 2, 3]
+    q.pop(); // [1, 2, 3] => [2, 3]
+    alert(q.front()); // 1)
+    q.pop(); // [2, 3] => [3]
+    alert(q.front()); // 1)
+    q.size(); // 1
+    q.pop(); // [3] => []
+  </script>
+  <div id="piyo">
+  </div>
+
+</body>
+
+</html>
